@@ -1,5 +1,6 @@
 declare namespace NodeJS {
   interface Global {
-    testRequest: import("supertest").SuperTest<import("supertest").Test>;
+    // https://stackoverflow.com/a/51114250
+    testRequest: import('supertest').SuperTest<import('supertest').Test>;
   }
 }
