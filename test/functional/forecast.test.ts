@@ -1,10 +1,8 @@
-import supertest from "supertest";
-
 describe("Beach forecast functional tests", () => {
   it("should return a forecast with just a few times", async () => {
-    const { body, status } = await supertest(app).get("/forecast");
+    const { body, status } = await global.testRequest.get("/forecast");
     expect(status).toBe(200);
-    expect(body).toBe([
+    expect(body).toEqual([
       {
         time: "2021-02-06T00:00:00+00:00",
         forecast: [
