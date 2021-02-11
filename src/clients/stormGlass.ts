@@ -1,6 +1,7 @@
 import { InternalError } from '@src/util/errors/internal-error';
-import { AxiosStatic } from 'axios';
 import config, { IConfig } from 'config';
+// Another way to have similar behaviour to TS namespaces
+import * as HTTPUtil from '@src/util/request';
 
 export interface StormGlassPointSource {
   [key: string]: number;
@@ -31,6 +32,10 @@ export interface ForecastPoint {
   windSpeed: number;
 }
 
+/**
+ * This error type is used when something breaks before the request reaches out to the StormGlass API
+ * eg: Network error, or request validation error
+ */
 export class ClientRequestError extends InternalError {
   constructor(message: string) {
     const internalMessage =
@@ -47,6 +52,9 @@ export class StormGlassResponseError extends InternalError {
   }
 }
 
+/**
+ *  We could have proper type for the configuration
+ */
 const stormGlassResourceConfig: IConfig = config.get(
   'App.resources.StormGlass'
 );
@@ -56,7 +64,7 @@ export class StormGlass {
     'swellDirection,swellHeight,swellPeriod,waveDirection,waveHeight,windDirection,windSpeed';
   readonly stormGlassAPISource = 'noaa';
 
-  constructor(protected request: AxiosStatic) {}
+  constructor(protected request = new HTTPUtil.Request()) {}
 
   public async fetchPoints(lat: number, lng: number): Promise<ForecastPoint[]> {
     try {
@@ -74,7 +82,10 @@ export class StormGlass {
       );
       return this.normalizeResponse(response.data);
     } catch (err) {
-      if (err.response && err.response.status) {
+      /**
+       * This is handling the Axios errors specifically
+       */
+      if (HTTPUtil.Request.isRequestError(err)) {
         throw new StormGlassResponseError(
           `Error: ${JSON.stringify(err.response.data)} Code: ${
             err.response.status
