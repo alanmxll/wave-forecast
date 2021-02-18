@@ -62,3 +62,6 @@ typings/
 
 # typescript compiled code
 dist/
+
+# Api Key
+apiKey.json
